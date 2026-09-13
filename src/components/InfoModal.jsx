@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { X, PackageCheck, Mail, MessageSquareQuote, Info, Loader2, CheckCircle2, AlertCircle, Clock, MapPin, Truck, ExternalLink, Layers, Search, Filter, ArrowLeft } from 'lucide-react';
+import { 
+  X, PackageCheck, Mail, MessageSquareQuote, Info, Loader2, CheckCircle2, 
+  AlertCircle, Clock, MapPin, Truck, ExternalLink, Layers, Search, Filter, 
+  ArrowLeft, Phone, Building, Headphones, Star, ThumbsUp, HelpCircle, 
+  ChevronDown, ChevronUp, Sparkles, Send, ShieldCheck 
+} from 'lucide-react';
 import { api } from '../services/api';
 import GoogleMapView from './GoogleMapView';
 
 export default function InfoModal({ type, onClose, initialSearchId = '' }) {
   if (!type || type === 'home') return null;
+
+  // General Loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   // Track Order State
   const [searchId, setSearchId] = useState(initialSearchId || '');
@@ -12,15 +20,22 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
 
-  // Contact Form State
+  // Contact Form & FAQ State
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
+  const [contactSubject, setContactSubject] = useState('Logistics & Pickups');
+  const [contactPriority, setContactPriority] = useState('Standard');
   const [contactMessage, setContactMessage] = useState('');
-  const [contactStatus, setContactStatus] = useState(null); // { type: 'success' | 'error', text }
+  const [contactStatus, setContactStatus] = useState(null); // { type: 'success' | 'error', text, ticketId }
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   // Feedback Form State
-  const [feedbackCategory, setFeedbackCategory] = useState('Logistics');
+  const [feedbackCategory, setFeedbackCategory] = useState('Logistics & Route Efficiency');
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [selectedFeedbackTags, setSelectedFeedbackTags] = useState(['⚡ Fast Pickups', '💰 Great Rates']);
   const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [feedbackEmail, setFeedbackEmail] = useState('');
   const [feedbackStatus, setFeedbackStatus] = useState(null);
 
   // Modal Mode State
@@ -102,6 +117,44 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
     }
   };
 
+  // FAQs Data
+  const faqs = [
+    {
+      question: "How do automated pickup schedules work for textile batches?",
+      answer: "Once you submit a pickup request, Loomora's AI matches your material type with certified recyclers and dispatches an automated driver for pickup within 2-4 hours."
+    },
+    {
+      question: "What types of materials and garment waste do you accept?",
+      answer: "We accept 100% Cotton, Polyester blends, Denim, Silk, Wool, Industrial fabric rolls, factory scraps, and post-consumer apparel."
+    },
+    {
+      question: "Is there any minimum weight requirement for doorstep collection?",
+      answer: "Drop-offs at municipal collection points have no minimum limit. For free door-step pickup, a minimum weight of 10 kg is recommended."
+    },
+    {
+      question: "How are payout estimates calculated for textile sales?",
+      answer: "Payout rates are real-time calculated based on fiber purity index, moisture content, market commodity rates, and buyer bidding."
+    }
+  ];
+
+  // Quick Feedback Tags
+  const availableTags = [
+    '⚡ Fast Pickups',
+    '💰 Great Rates',
+    '🗺️ Accurate GPS',
+    '🤖 Helpful AI',
+    '🌿 Zero Landfill',
+    '📱 Clean UI'
+  ];
+
+  const toggleFeedbackTag = (tag) => {
+    if (selectedFeedbackTags.includes(tag)) {
+      setSelectedFeedbackTags(selectedFeedbackTags.filter(t => t !== tag));
+    } else {
+      setSelectedFeedbackTags([...selectedFeedbackTags, tag]);
+    }
+  };
+
   // Submit Contact Us Form
   const handleContactSubmit = async (e) => {
     e.preventDefault();
@@ -114,12 +167,20 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
     setContactStatus(null);
 
     try {
+      const ticketNum = `LMR-${Math.floor(10000 + Math.random() * 90000)}`;
       await api.submitContact({
-        name: contactName || 'Anonymous User',
-        email: contactEmail || 'user@texloop.org',
-        message: contactMessage
+        name: contactName || 'Anonymous Partner',
+        email: contactEmail || 'partner@loomora.org',
+        subject: contactSubject,
+        priority: contactPriority,
+        message: contactMessage,
+        ticketId: ticketNum
       });
-      setContactStatus({ type: 'success', text: 'Thank you! Your inquiry has been submitted to the logistics team.' });
+      setContactStatus({ 
+        type: 'success', 
+        text: `Inquiry successfully submitted! Our logistics team will respond within 2 hours.`,
+        ticketId: ticketNum
+      });
       setContactMessage('');
     } catch (err) {
       setContactStatus({ type: 'error', text: err.message || 'Failed to submit inquiry. Please try again.' });
@@ -131,8 +192,8 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
   // Submit Feedback Form
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
-    if (!feedbackMessage.trim()) {
-      setFeedbackStatus({ type: 'error', text: 'Please enter your feedback message.' });
+    if (!feedbackMessage.trim() && selectedFeedbackTags.length === 0) {
+      setFeedbackStatus({ type: 'error', text: 'Please provide feedback comments or select feedback tags.' });
       return;
     }
 
@@ -142,9 +203,15 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
     try {
       await api.submitFeedback({
         category: feedbackCategory,
-        message: feedbackMessage
+        rating: feedbackRating,
+        tags: selectedFeedbackTags,
+        message: feedbackMessage || `Rated ${feedbackRating} stars with tags: ${selectedFeedbackTags.join(', ')}`,
+        email: feedbackEmail || 'partner@loomora.org'
       });
-      setFeedbackStatus({ type: 'success', text: 'Thank you for your feedback! It will help optimize our circular routes.' });
+      setFeedbackStatus({ 
+        type: 'success', 
+        text: `Thank you for rating us ${feedbackRating} ⭐! Your feedback helps optimize circular fashion logistics.`
+      });
       setFeedbackMessage('');
     } catch (err) {
       setFeedbackStatus({ type: 'error', text: err.message || 'Failed to submit feedback.' });
@@ -176,7 +243,9 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
         style={{ 
           maxWidth: (activeMode === 'order-details' || activeMode === 'order-history') 
             ? '880px' 
-            : ((activeMode === 'track-order' && orderResult) ? '720px' : '560px'), 
+            : ((activeMode === 'contact-us' || activeMode === 'feedback')
+              ? '680px'
+              : ((activeMode === 'track-order' && orderResult) ? '720px' : '560px')), 
           maxHeight: '90vh', 
           overflowY: 'auto' 
         }} 
@@ -327,97 +396,304 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
 
         {/* MODE 2: CONTACT US */}
         {activeMode === 'contact-us' && (
-          <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            <div className="form-group">
-              <label className="label">Your Name</label>
-              <input 
-                type="text" 
-                className="input" 
-                placeholder="e.g. Sarah Jenkins"
-                value={contactName}
-                onChange={(e) => setContactName(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="label">Your Email</label>
-              <input 
-                type="email" 
-                className="input" 
-                placeholder="e.g. sarah@company.com"
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="label">Inquiry Message</label>
-              <textarea 
-                className="input" 
-                rows={3}
-                placeholder="Specify your collection inquiry or enterprise request..."
-                value={contactMessage}
-                onChange={(e) => setContactMessage(e.target.value)}
-                required
-              />
-            </div>
-
-            {contactStatus && (
-              <div style={{ padding: 'var(--space-3)', background: contactStatus.type === 'success' ? '#D1FAE5' : '#FEE2E2', border: contactStatus.type === 'success' ? '1px solid #6EE7B7' : '1px solid #FCA5A5', color: contactStatus.type === 'success' ? '#065F46' : '#991B1B', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-xs)' }}>
-                {contactStatus.text}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            {/* Quick Contact Info Cards */}
+            <div className="grid-3" style={{ gap: 'var(--space-3)' }}>
+              <div style={{ padding: 'var(--space-3)', background: '#F8FAFC', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-md)', background: 'var(--color-primary-light)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Phone size={16} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 'var(--font-size-xs)', color: 'var(--color-primary)' }}>24/7 Support Line</div>
+                  <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '2px' }}>+1 (800) 555-LOOM</div>
+                  <div style={{ fontSize: '10px', color: '#059669', fontWeight: 600 }}>Toll-Free & Live</div>
+                </div>
               </div>
-            )}
 
-            <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', marginTop: 'var(--space-2)' }}>
-              <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-              <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                {isLoading ? <Loader2 size={16} className="spin" /> : <Mail size={16} />}
-                <span>Send Inquiry</span>
-              </button>
+              <div style={{ padding: 'var(--space-3)', background: '#F8FAFC', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-md)', background: 'var(--color-secondary-light)', color: 'var(--color-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Mail size={16} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 'var(--font-size-xs)', color: 'var(--color-secondary)' }}>Logistics Desk</div>
+                  <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '2px' }}>support@loomora.org</div>
+                  <div style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>Avg reply: 15 mins</div>
+                </div>
+              </div>
+
+              <div style={{ padding: 'var(--space-3)', background: '#F8FAFC', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-md)', background: '#FEF3C7', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Building size={16} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 'var(--font-size-xs)', color: '#B45309' }}>Circular HQ</div>
+                  <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '2px' }}>100 Eco Tech Way, SF</div>
+                  <div style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>Mon-Sat 8am - 7pm</div>
+                </div>
+              </div>
             </div>
-          </form>
+
+            {/* Contact Inquiry Form */}
+            <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', padding: 'var(--space-4)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)' }}>
+              <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--font-size-sm)', color: 'var(--color-primary)' }}>
+                <Send size={16} />
+                <span>Submit Logistics or Enterprise Inquiry</span>
+              </h4>
+
+              <div className="grid-2" style={{ gap: 'var(--space-3)' }}>
+                <div className="form-group">
+                  <label className="label">Your Full Name</label>
+                  <input 
+                    type="text" 
+                    className="input" 
+                    placeholder="e.g. Sarah Jenkins"
+                    value={contactName}
+                    onChange={(e) => setContactName(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="label">Work / Contact Email</label>
+                  <input 
+                    type="email" 
+                    className="input" 
+                    placeholder="e.g. sarah@fashionbrand.com"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid-2" style={{ gap: 'var(--space-3)' }}>
+                <div className="form-group">
+                  <label className="label">Inquiry Department / Topic</label>
+                  <select className="select" value={contactSubject} onChange={(e) => setContactSubject(e.target.value)}>
+                    <option value="Logistics & Pickups">Logistics & Pickups</option>
+                    <option value="Enterprise Scrap Management">Enterprise Scrap Management</option>
+                    <option value="Recycling Vendor Onboarding">Recycling Vendor Onboarding</option>
+                    <option value="Billing & Payouts">Billing & Payouts</option>
+                    <option value="Other Inquiry">Other Technical Support</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="label">Priority Level</label>
+                  <select className="select" value={contactPriority} onChange={(e) => setContactPriority(e.target.value)}>
+                    <option value="Standard">Standard (Reply within 24h)</option>
+                    <option value="High Priority">High Priority (Reply within 4h)</option>
+                    <option value="Urgent Pickup Request">Urgent Pickup Request (Immediate)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="label">Detailed Inquiry Message</label>
+                <textarea 
+                  className="input" 
+                  rows={3}
+                  placeholder="Describe your bulk textile collection, vendor partnership, or platform question..."
+                  value={contactMessage}
+                  onChange={(e) => setContactMessage(e.target.value)}
+                  required
+                />
+              </div>
+
+              {contactStatus && (
+                <div style={{ padding: 'var(--space-3)', background: contactStatus.type === 'success' ? '#D1FAE5' : '#FEE2E2', border: contactStatus.type === 'success' ? '1px solid #6EE7B7' : '1px solid #FCA5A5', color: contactStatus.type === 'success' ? '#065F46' : '#991B1B', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-xs)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}>
+                    {contactStatus.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                    <span>{contactStatus.text}</span>
+                  </div>
+                  {contactStatus.ticketId && (
+                    <div style={{ fontSize: '11px', opacity: 0.9 }}>
+                      Support Ticket ID: <strong>{contactStatus.ticketId}</strong> (saved to database)
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', marginTop: 'var(--space-1)' }}>
+                <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                  {isLoading ? <Loader2 size={16} className="spin" /> : <Mail size={16} />}
+                  <span>Submit Inquiry</span>
+                </button>
+              </div>
+            </form>
+
+            {/* Interactive FAQ Section */}
+            <div style={{ padding: 'var(--space-4)', background: '#F8FAFC', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)' }}>
+              <h4 style={{ margin: '0 0 var(--space-3) 0', display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--font-size-sm)', color: 'var(--color-primary)' }}>
+                <HelpCircle size={16} />
+                <span>Frequently Asked Questions</span>
+              </h4>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                {faqs.map((faq, idx) => (
+                  <div key={idx} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'white' }}>
+                    <button 
+                      type="button" 
+                      onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
+                      style={{ width: '100%', padding: 'var(--space-3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', textAlign: 'left', fontWeight: 600, fontSize: 'var(--font-size-xs)', color: 'var(--color-text)', cursor: 'pointer' }}
+                    >
+                      <span>{faq.question}</span>
+                      {openFaqIndex === idx ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </button>
+                    {openFaqIndex === idx && (
+                      <div style={{ padding: '0 var(--space-3) var(--space-3) var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', borderTop: '1px solid var(--color-border-subtle)', paddingTop: 'var(--space-2)' }}>
+                        {faq.answer}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
 
         {/* MODE 3: FEEDBACK */}
         {activeMode === 'feedback' && (
-          <form onSubmit={handleFeedbackSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            <div className="form-group">
-              <label className="label">Feedback Category</label>
-              <select className="select" value={feedbackCategory} onChange={(e) => setFeedbackCategory(e.target.value)}>
-                <option value="Logistics">Logistics & Route Efficiency</option>
-                <option value="Vendor Matching">Vendor Matching Quality</option>
-                <option value="Platform Usability">Platform Usability & UI</option>
-                <option value="Collection Points">Municipal Collection Points</option>
-                <option value="Other">Other Suggestion</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="label">Feedback Details</label>
-              <textarea 
-                className="input" 
-                rows={3}
-                placeholder="Share suggestions to improve our textile recycling experience..."
-                value={feedbackMessage}
-                onChange={(e) => setFeedbackMessage(e.target.value)}
-                required
-              />
-            </div>
-
-            {feedbackStatus && (
-              <div style={{ padding: 'var(--space-3)', background: feedbackStatus.type === 'success' ? '#D1FAE5' : '#FEE2E2', border: feedbackStatus.type === 'success' ? '1px solid #6EE7B7' : '1px solid #FCA5A5', color: feedbackStatus.type === 'success' ? '#065F46' : '#991B1B', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-xs)' }}>
-                {feedbackStatus.text}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            {/* Feedback Stats Header Banner */}
+            <div style={{ padding: 'var(--space-3) var(--space-4)', background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)', border: '1px solid #A7F3D0', borderRadius: 'var(--radius-lg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#059669', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                  4.9
+                </div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 'var(--font-size-sm)', color: '#065F46' }}>Platform Satisfaction Rating</div>
+                  <div style={{ fontSize: '11px', color: '#047857' }}>Based on 1,480+ verified textile recycling partners & brands</div>
+                </div>
               </div>
-            )}
-
-            <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', marginTop: 'var(--space-2)' }}>
-              <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-              <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                {isLoading ? <Loader2 size={16} className="spin" /> : <MessageSquareQuote size={16} />}
-                <span>Submit Feedback</span>
-              </button>
+              <div style={{ display: 'flex', gap: '2px', color: '#F59E0B' }}>
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star key={s} size={18} fill="#F59E0B" color="#F59E0B" />
+                ))}
+              </div>
             </div>
-          </form>
+
+            {/* Main Interactive Feedback Form */}
+            <form onSubmit={handleFeedbackSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', padding: 'var(--space-4)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)' }}>
+              
+              {/* Star Rating Selection */}
+              <div>
+                <label className="label" style={{ marginBottom: 'var(--space-2)', display: 'block' }}>Rate Your Loomora Experience</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {[1, 2, 3, 4, 5].map((starVal) => {
+                      const isActive = (hoverRating || feedbackRating) >= starVal;
+                      return (
+                        <button
+                          key={starVal}
+                          type="button"
+                          onClick={() => setFeedbackRating(starVal)}
+                          onMouseEnter={() => setHoverRating(starVal)}
+                          onMouseLeave={() => setHoverRating(0)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', transition: 'transform 0.15s ease' }}
+                        >
+                          <Star 
+                            size={28} 
+                            fill={isActive ? '#F59E0B' : 'transparent'} 
+                            color={isActive ? '#F59E0B' : '#9CA3AF'} 
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <span style={{ fontSize: 'var(--font-size-xs)', fontWeight: 700, color: 'var(--color-primary)' }}>
+                    {feedbackRating === 5 && '🌟 Outstanding Experience!'}
+                    {feedbackRating === 4 && '👍 Great & Reliable Service'}
+                    {feedbackRating === 3 && '👌 Good / Average'}
+                    {feedbackRating === 2 && '⚠️ Needs Some Improvement'}
+                    {feedbackRating === 1 && '❌ Unsatisfactory'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Quick Tag Chips */}
+              <div>
+                <label className="label" style={{ marginBottom: 'var(--space-2)', display: 'block' }}>What did you like best? (Select tags)</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+                  {availableTags.map((tag) => {
+                    const isSelected = selectedFeedbackTags.includes(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => toggleFeedbackTag(tag)}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '20px',
+                          border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
+                          background: isSelected ? 'var(--color-accent)' : '#F8FAFC',
+                          color: isSelected ? 'var(--color-primary)' : 'var(--color-text)',
+                          fontWeight: isSelected ? 700 : 500,
+                          fontSize: 'var(--font-size-xs)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {tag} {isSelected ? '✓' : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Feedback Category & Email */}
+              <div className="grid-2" style={{ gap: 'var(--space-3)' }}>
+                <div className="form-group">
+                  <label className="label">Feedback Area</label>
+                  <select className="select" value={feedbackCategory} onChange={(e) => setFeedbackCategory(e.target.value)}>
+                    <option value="Logistics & Route Efficiency">Logistics & Route Efficiency</option>
+                    <option value="Vendor Matching & Pricing">Vendor Matching & Pricing</option>
+                    <option value="AI Assistant & Chat">AI Assistant & Chat</option>
+                    <option value="App UI & Usability">App UI & Usability</option>
+                    <option value="Municipal Bins & Dropoffs">Municipal Bins & Dropoffs</option>
+                    <option value="Other Suggestion">Other Suggestion</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="label">Your Email (Optional for reply)</label>
+                  <input 
+                    type="email" 
+                    className="input" 
+                    placeholder="e.g. partner@loomora.org"
+                    value={feedbackEmail}
+                    onChange={(e) => setFeedbackEmail(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Feedback Message */}
+              <div className="form-group">
+                <label className="label">Detailed Feedback & Ideas</label>
+                <textarea 
+                  className="input" 
+                  rows={3}
+                  placeholder="Share details on how we can improve our circular textile platform..."
+                  value={feedbackMessage}
+                  onChange={(e) => setFeedbackMessage(e.target.value)}
+                />
+              </div>
+
+              {feedbackStatus && (
+                <div style={{ padding: 'var(--space-3)', background: feedbackStatus.type === 'success' ? '#D1FAE5' : '#FEE2E2', border: feedbackStatus.type === 'success' ? '1px solid #6EE7B7' : '1px solid #FCA5A5', color: feedbackStatus.type === 'success' ? '#065F46' : '#991B1B', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-xs)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {feedbackStatus.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                  <span>{feedbackStatus.text}</span>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', marginTop: 'var(--space-1)' }}>
+                <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                  {isLoading ? <Loader2 size={16} className="spin" /> : <MessageSquareQuote size={16} />}
+                  <span>Submit Feedback</span>
+                </button>
+              </div>
+            </form>
+          </div>
         )}
 
         {/* MODE 4: ABOUT US */}

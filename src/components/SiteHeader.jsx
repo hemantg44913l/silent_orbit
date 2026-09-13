@@ -31,15 +31,11 @@ export default function SiteHeader({
       <div className="site-header-inner">
         {/* Brand Logo */}
         <div className="header-brand" onClick={() => handleNavClick('home')}>
-          <div className="header-brand-icon">
-            <Recycle size={22} />
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span className="header-brand-text">TexLoop</span>
-              <span className="header-brand-tag">WASTE OPTIMIZATION</span>
-            </div>
-          </div>
+          <img 
+            src="/assets/loomora_logo.png" 
+            alt="LOOMORA Circular Fashion Tech" 
+            style={{ height: '48px', width: 'auto', objectFit: 'contain' }} 
+          />
         </div>
 
         {/* Primary Navigation Menu */}

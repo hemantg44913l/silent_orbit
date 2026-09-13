@@ -8,9 +8,12 @@ export default function SiteFooter({ onSelectNav, onFindBestPath }) {
         <div className="footer-grid">
           {/* Column 1: Brand & Mission */}
           <div className="footer-col-brand">
-            <div className="footer-brand-title">
-              <Recycle size={24} style={{ color: 'var(--color-primary)' }} />
-              <span>TexLoop</span>
+            <div className="footer-brand-title" onClick={() => onSelectNav('home')} style={{ cursor: 'pointer' }}>
+              <img 
+                src="/assets/loomora_logo.png" 
+                alt="LOOMORA Circular Fashion Tech" 
+                style={{ height: '42px', width: 'auto', objectFit: 'contain', background: '#FFFFFF', padding: '4px 10px', borderRadius: '8px' }} 
+              />
             </div>
             <p style={{ fontSize: 'var(--font-size-sm)', lineHeight: '1.6', color: '#94A3B8' }}>
               Waste Optimization & Circular Fashion platform connecting textile waste suppliers, municipal drop hubs, and high-tech fiber recyclers into zero-landfill recovery routes.

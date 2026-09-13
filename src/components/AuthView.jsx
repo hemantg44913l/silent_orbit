@@ -94,13 +94,11 @@ export default function AuthView({ onLoginSuccess }) {
 
         {/* Top Branding Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-md)', backgroundColor: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
-            <Recycle size={28} />
-          </div>
-          <div>
-            <h1 style={{ color: 'white', fontSize: 'var(--font-size-xl)', margin: 0 }}>TexLoop Platform</h1>
-            <span style={{ fontSize: 'var(--font-size-xs)', color: '#A7F3D0', fontWeight: 600 }}>Zero-Landfill Circular Textile Logistics</span>
-          </div>
+          <img 
+            src="/assets/loomora_logo.png" 
+            alt="LOOMORA Circular Fashion Tech" 
+            style={{ height: '54px', width: 'auto', objectFit: 'contain', background: '#FFFFFF', padding: '6px 14px', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }} 
+          />
         </div>
 
         {/* Center Content Brief */}

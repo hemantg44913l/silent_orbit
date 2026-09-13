@@ -32,10 +32,14 @@ export default function SiteHeader({
         {/* Brand Logo */}
         <div className="header-brand" onClick={() => handleNavClick('home')}>
           <img 
-            src="/assets/loomora_logo.png" 
-            alt="LOOMORA Circular Fashion Tech" 
-            style={{ height: '48px', width: 'auto', objectFit: 'contain' }} 
+            src="/assets/loomora_icon.png" 
+            alt="Loomora Icon" 
+            style={{ height: '44px', width: 'auto', objectFit: 'contain' }} 
           />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span className="header-brand-text" style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--color-secondary)', letterSpacing: '-0.02em' }}>LOOMORA</span>
+            <span className="header-brand-tag">CIRCULAR FASHION TECH</span>
+          </div>
         </div>
 
         {/* Primary Navigation Menu */}

@@ -8,7 +8,7 @@ export default function AIChatBot() {
     {
       id: 'welcome',
       sender: 'ai',
-      text: "👋 Hi! I'm **TexLoop AI Assistant**. Ask me any doubt about textile recycling, vendor buyback rates, DIY upcycling ideas, or consignment tracking!",
+      text: "👋 Hi! I'm **Loomora AI Assistant**. Ask me any doubt about textile recycling, vendor buyback rates, DIY upcycling ideas, or consignment tracking!",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -84,7 +84,7 @@ export default function AIChatBot() {
       {
         id: 'welcome',
         sender: 'ai',
-        text: "👋 Hi! I'm **TexLoop AI Assistant**. Ask me any doubt about textile recycling, vendor buyback rates, DIY upcycling ideas, or consignment tracking!",
+        text: "👋 Hi! I'm **Loomora AI Assistant**. Ask me any doubt about textile recycling, vendor buyback rates, DIY upcycling ideas, or consignment tracking!",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -198,7 +198,7 @@ export default function AIChatBot() {
                 <Bot size={22} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '15px', color: 'white', fontWeight: 800 }}>TexLoop AI Assistant</h3>
+                <h3 style={{ margin: 0, fontSize: '15px', color: 'white', fontWeight: 800 }}>Loomora AI Assistant</h3>
                 <span style={{ fontSize: '11px', color: '#A7F3D0', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34D399' }} />
                   Online • 24/7 AI Doubts Helper

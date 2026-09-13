@@ -93,12 +93,16 @@ export default function AuthView({ onLoginSuccess }) {
         <div style={{ position: 'absolute', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 70%)', top: '-150px', left: '-150px', pointerEvents: 'none' }} />
 
         {/* Top Branding Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <img 
-            src="/assets/loomora_logo.png" 
-            alt="LOOMORA Circular Fashion Tech" 
-            style={{ height: '54px', width: 'auto', objectFit: 'contain', background: '#FFFFFF', padding: '6px 14px', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }} 
+            src="/assets/loomora_icon.png" 
+            alt="Loomora Icon" 
+            style={{ height: '48px', width: 'auto', objectFit: 'contain' }} 
           />
+          <div>
+            <h1 style={{ color: 'white', fontSize: '1.75rem', margin: 0, fontWeight: 800, letterSpacing: '-0.02em' }}>LOOMORA</h1>
+            <span style={{ fontSize: 'var(--font-size-xs)', color: '#A7F3D0', fontWeight: 600 }}>CIRCULAR FASHION TECH</span>
+          </div>
         </div>
 
         {/* Center Content Brief */}

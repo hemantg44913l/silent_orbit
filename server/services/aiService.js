@@ -1,5 +1,5 @@
 /**
- * TexLoop AI Assistant Service
+ * Loomora AI Assistant Service
  * Integrates external free AI API with intelligent fallback domain engine.
  */
 
@@ -9,9 +9,9 @@
 const DOMAIN_KNOWLEDGE = [
   {
     keywords: ['price', 'rate', 'payout', 'cost', 'money', 'earn', 'sell', 'vendor', 'valuable'],
-    response: `### 💰 TexLoop Vendor Buyback Rates & Pricing
+    response: `### 💰 Loomora Vendor Buyback Rates & Pricing
 
-TexLoop matches your textile waste with top certified fiber recycling vendors based on material purity and market demand:
+Loomora matches your textile waste with top certified fiber recycling vendors based on material purity and market demand:
 
 * **100% Pure Cotton**: Up to **$1.85 / kg** (Highest demand for mechanically recycled yarn).
 * **Denim & Heavy Canvas**: Up to **$1.60 / kg** (Great for insulation & fiber blending).
@@ -24,7 +24,7 @@ TexLoop matches your textile waste with top certified fiber recycling vendors ba
   },
   {
     keywords: ['how it works', 'process', 'step', 'flow', 'start', 'begin', 'help', 'guide'],
-    response: `### 🔄 How TexLoop Works in 5 Easy Steps
+    response: `### 🔄 How Loomora Works in 5 Easy Steps
 
 1. **Provide Image**: Upload a photo or take a live camera shot of your textile waste batch.
 2. **Choose Pathway**: Select whether you want to **Sell to Vendor**, **Reuse / DIY Upcycle**, or **Zero-Landfill Disposal**.
@@ -50,7 +50,7 @@ You can track any active textile pickup consignment anytime:
     keywords: ['material', 'fabric', 'cotton', 'polyester', 'denim', 'wool', 'linen', 'blend', 'accept'],
     response: `### 🧵 Accepted Textile Materials
 
-TexLoop accepts a wide spectrum of post-consumer garments and post-industrial scrap:
+Loomora accepts a wide spectrum of post-consumer garments and post-industrial scrap:
 
 * **Natural Fibers**: Cotton, Linen, Wool, Silk, Hemp.
 * **Synthetic Fibers**: Polyester (PET), Nylon, Acrylic, Spandex/Elastane.
@@ -63,7 +63,7 @@ TexLoop accepts a wide spectrum of post-consumer garments and post-industrial sc
     keywords: ['diy', 'reuse', 'upcycle', 'craft', 'ideas', 'pattern', 'project'],
     response: `### ✂️ DIY & Upcycling Ideas
 
-If you select the **Reuse / DIY** pathway, TexLoop generates step-by-step upcycling ideas based on your material:
+If you select the **Reuse / DIY** pathway, Loomora generates step-by-step upcycling ideas based on your material:
 
 * **T-Shirt Yarn Rugs**: Cut worn cotton shirts into continuous strips for crochet bath mats.
 * **Denim Tote Bags**: Upcycle old jeans into durable shopping totes with zero sewing required.
@@ -74,7 +74,7 @@ If you select the **Reuse / DIY** pathway, TexLoop generates step-by-step upcycl
     keywords: ['location', 'pickup', 'address', 'map', 'route', 'austin', 'city'],
     response: `### 📍 Pickup Location & Navigation
 
-TexLoop integrates **Google Places Search** and **OpenStreetMap (CARTO Voyager)** 3D maps:
+Loomora integrates **Google Places Search** and **OpenStreetMap (CARTO Voyager)** 3D maps:
 
 * Enter any city, street, or landmark address.
 * Our system automatically calculates latitude and longitude coordinates.
@@ -86,7 +86,7 @@ TexLoop integrates **Google Places Search** and **OpenStreetMap (CARTO Voyager)*
 
 Our sustainability team is here to assist you:
 
-* **Email**: support@texloop.org
+* **Email**: support@loomora.org
 * **Logistics Hub**: 100 Circular Way, Austin, TX 78701
 * **In-App Inquiries**: Click **Contact Us** or **Feedback** in the top navigation bar to send a message directly to our dispatchers!`
   }
@@ -98,7 +98,7 @@ Our sustainability team is here to assist you:
 export async function generateAIResponse(userMessage, conversationHistory = []) {
   if (!userMessage || typeof userMessage !== 'string' || !userMessage.trim()) {
     return {
-      reply: "Hello! I am **TexLoop AI Assistant**. How can I help you with textile recycling, vendor pricing, or pickup tracking today?"
+      reply: "Hello! I am **Loomora AI Assistant**. How can I help you with textile recycling, vendor pricing, or pickup tracking today?"
     };
   }
 
@@ -114,7 +114,7 @@ export async function generateAIResponse(userMessage, conversationHistory = []) 
           contents: [
             {
               role: 'user',
-              parts: [{ text: `You are TexLoop AI Assistant, an expert advisor on textile waste recycling, vendor payouts, circular fashion, and eco-logistics. User question: ${userMessage}` }]
+              parts: [{ text: `You are Loomora AI Assistant, an expert advisor on textile waste recycling, vendor payouts, circular fashion, and eco-logistics. User question: ${userMessage}` }]
             }
           ]
         })
@@ -137,18 +137,18 @@ export async function generateAIResponse(userMessage, conversationHistory = []) 
     if (item.keywords.some(kw => query.includes(kw))) {
       return {
         reply: item.response,
-        source: 'texloop-domain-ai'
+        source: 'loomora-domain-ai'
       };
     }
   }
 
   // Default AI Assistant Response
   return {
-    reply: `### 🌿 TexLoop Circular AI Assistant
+    reply: `### 🌿 Loomora Circular AI Assistant
 
 Thank you for your question about **"${userMessage}"**!
 
-TexLoop is an end-to-end digital platform designed to eliminate textile waste:
+Loomora is an end-to-end digital platform designed to eliminate textile waste:
 
 * 📊 **Automated Matching**: Connects garment waste batches with high-payout fiber recyclers.
 * 🚚 **Smart Logistics**: Uses OSRM route telematics for optimal zero-landfill pickup.
@@ -159,6 +159,6 @@ You can ask me questions about:
 2. How to track your active pickup consignment.
 3. Accepted vs rejected fabric materials.
 4. DIY upcycling tutorials & ideas!`,
-    source: 'texloop-domain-ai'
+    source: 'loomora-domain-ai'
   };
 }

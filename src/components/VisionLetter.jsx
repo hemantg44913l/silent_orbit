@@ -56,7 +56,7 @@ export default function VisionLetter({ onBackToDashboard }) {
         <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           <h2>Executive Summary & Strategic Directive</h2>
           <div className="caption" style={{ fontSize: 'var(--font-size-base)', lineHeight: 'var(--line-height-relaxed)', padding: 'var(--space-4)', background: 'var(--color-background)', borderRadius: 'var(--radius-md)' }}>
-            Comprehensive vision statement outlining TexLoop's mission to transform textile waste from an environmental liability into a high-value industrial raw material through automated geospatial routing, material purity telemetry, and transparent buyback valuation.
+            Comprehensive vision statement outlining Loomora's mission to transform textile waste from an environmental liability into a high-value industrial raw material through automated geospatial routing, material purity telemetry, and transparent buyback valuation.
           </div>
         </section>
 

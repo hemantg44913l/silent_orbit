@@ -360,7 +360,7 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
         {type === 'about-us' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             <div style={{ padding: 'var(--space-4)', background: 'var(--color-accent)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', lineHeight: '1.6' }}>
-              <strong>TexLoop Logistics & Optimization Platform</strong> is an end-to-end circular economy system connecting garment manufacturers, fashion brands, municipal collection points, and high-tech fiber recyclers.
+              <strong>Loomora Circular Fashion Tech Platform</strong> is an end-to-end circular economy system connecting garment manufacturers, fashion brands, municipal collection points, and high-tech fiber recyclers.
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', fontSize: 'var(--font-size-xs)' }}>

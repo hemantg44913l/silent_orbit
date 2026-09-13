@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, PackageCheck, Mail, MessageSquareQuote, Info, Loader2, CheckCircle2, AlertCircle, Clock, MapPin, Truck, ExternalLink, Layers, Search, Filter } from 'lucide-react';
+import { X, PackageCheck, Mail, MessageSquareQuote, Info, Loader2, CheckCircle2, AlertCircle, Clock, MapPin, Truck, ExternalLink, Layers, Search, Filter, ArrowLeft } from 'lucide-react';
 import { api } from '../services/api';
 import GoogleMapView from './GoogleMapView';
 
@@ -56,10 +56,16 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
     }
   };
 
-  const handleTrackSpecificOrder = (orderIdToTrack) => {
-    setSearchId(orderIdToTrack);
+  const handleTrackSpecificOrder = async (ord) => {
+    const targetId = typeof ord === 'string' ? ord : (ord.orderId || ord._id);
+    setSearchId(targetId);
     setActiveMode('track-order');
-    handleSearchOrder(orderIdToTrack);
+    if (typeof ord === 'object' && ord.orderId) {
+      setOrderResult(ord);
+      setSearchError(null);
+    } else {
+      await handleSearchOrder(targetId);
+    }
   };
 
   // Auto search if initialSearchId is provided
@@ -213,8 +219,20 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
         </div>
 
         {/* MODE 1: TRACK ORDER */}
-        {type === 'track-order' && (
+        {activeMode === 'track-order' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            {(type === 'order-details' || type === 'order-history') && (
+              <button 
+                type="button" 
+                className="btn btn-ghost" 
+                onClick={() => setActiveMode(type)}
+                style={{ alignSelf: 'flex-start', padding: '2px 8px', fontSize: 'var(--font-size-xs)', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <ArrowLeft size={14} />
+                <span>Back to Order Details</span>
+              </button>
+            )}
+
             <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
               <input 
                 type="text" 
@@ -308,7 +326,7 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
         )}
 
         {/* MODE 2: CONTACT US */}
-        {type === 'contact-us' && (
+        {activeMode === 'contact-us' && (
           <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
             <div className="form-group">
               <label className="label">Your Name</label>
@@ -361,7 +379,7 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
         )}
 
         {/* MODE 3: FEEDBACK */}
-        {type === 'feedback' && (
+        {activeMode === 'feedback' && (
           <form onSubmit={handleFeedbackSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
             <div className="form-group">
               <label className="label">Feedback Category</label>
@@ -403,7 +421,7 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
         )}
 
         {/* MODE 4: ABOUT US */}
-        {type === 'about-us' && (
+        {activeMode === 'about-us' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             <div style={{ padding: 'var(--space-4)', background: 'var(--color-accent)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-sm)', lineHeight: '1.6' }}>
               <strong>Loomora Circular Fashion Tech Platform</strong> is an end-to-end circular economy system connecting garment manufacturers, fashion brands, municipal collection points, and high-tech fiber recyclers.
@@ -529,7 +547,7 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
                           <button 
                             type="button"
                             className="btn btn-secondary"
-                            onClick={() => handleTrackSpecificOrder(ord.orderId)}
+                            onClick={() => handleTrackSpecificOrder(ord)}
                             style={{ padding: '5px 12px', fontSize: 'var(--font-size-xs)' }}
                           >
                             <PackageCheck size={14} />

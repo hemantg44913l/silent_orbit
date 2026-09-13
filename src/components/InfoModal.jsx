@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, PackageCheck, Mail, MessageSquareQuote, Info, Loader2, CheckCircle2, AlertCircle, Clock, MapPin, Truck, ExternalLink } from 'lucide-react';
+import { X, PackageCheck, Mail, MessageSquareQuote, Info, Loader2, CheckCircle2, AlertCircle, Clock, MapPin, Truck, ExternalLink, Layers, Search, Filter } from 'lucide-react';
 import { api } from '../services/api';
 import GoogleMapView from './GoogleMapView';
 
@@ -23,7 +23,44 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [feedbackStatus, setFeedbackStatus] = useState(null);
 
-  const [isLoading, setIsLoading] = useState(false);
+  // Modal Mode State
+  const [activeMode, setActiveMode] = useState(type);
+
+  // Orders History State
+  const [allOrders, setAllOrders] = useState([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Sync mode with type prop
+  useEffect(() => {
+    setActiveMode(type);
+  }, [type]);
+
+  // Load database orders when order-details or order-history is active
+  useEffect(() => {
+    if (activeMode === 'order-details' || activeMode === 'order-history') {
+      loadAllOrders();
+    }
+  }, [activeMode]);
+
+  const loadAllOrders = async () => {
+    setIsLoadingOrders(true);
+    try {
+      const orders = await api.fetchAllOrders();
+      setAllOrders(orders || []);
+    } catch (err) {
+      console.warn('Error loading orders:', err);
+    } finally {
+      setIsLoadingOrders(false);
+    }
+  };
+
+  const handleTrackSpecificOrder = (orderIdToTrack) => {
+    setSearchId(orderIdToTrack);
+    setActiveMode('track-order');
+    handleSearchOrder(orderIdToTrack);
+  };
 
   // Auto search if initialSearchId is provided
   useEffect(() => {
@@ -130,7 +167,13 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
     <div className="modal-overlay" onClick={onClose} aria-modal="true" role="dialog">
       <div 
         className="modal-content-box" 
-        style={{ maxWidth: type === 'track-order' && orderResult ? '720px' : '560px', maxHeight: '90vh', overflowY: 'auto' }} 
+        style={{ 
+          maxWidth: (activeMode === 'order-details' || activeMode === 'order-history') 
+            ? '880px' 
+            : ((activeMode === 'track-order' && orderResult) ? '720px' : '560px'), 
+          maxHeight: '90vh', 
+          overflowY: 'auto' 
+        }} 
         onClick={(e) => e.stopPropagation()}
       >
         <button 
@@ -145,23 +188,26 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
         {/* MODAL HEADER */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
           <div className="logo-badge" style={{ width: '44px', height: '44px', flexShrink: 0 }}>
-            {type === 'track-order' && <PackageCheck size={22} />}
-            {type === 'contact-us' && <Mail size={22} />}
-            {type === 'feedback' && <MessageSquareQuote size={22} />}
-            {type === 'about-us' && <Info size={22} />}
+            {(activeMode === 'order-details' || activeMode === 'order-history') && <Layers size={22} />}
+            {activeMode === 'track-order' && <PackageCheck size={22} />}
+            {activeMode === 'contact-us' && <Mail size={22} />}
+            {activeMode === 'feedback' && <MessageSquareQuote size={22} />}
+            {activeMode === 'about-us' && <Info size={22} />}
           </div>
           <div>
             <h2 style={{ margin: 0 }}>
-              {type === 'track-order' && 'Track Order & Pickup Status'}
-              {type === 'contact-us' && 'Contact Recycling Logistics'}
-              {type === 'feedback' && 'Platform Feedback & Ideas'}
-              {type === 'about-us' && 'About TexLoop Platform'}
+              {(activeMode === 'order-details' || activeMode === 'order-history') && 'Order History & Database Consignments'}
+              {activeMode === 'track-order' && 'Track Order & Pickup Status'}
+              {activeMode === 'contact-us' && 'Contact Recycling Logistics'}
+              {activeMode === 'feedback' && 'Platform Feedback & Ideas'}
+              {activeMode === 'about-us' && 'About Loomora Platform'}
             </h2>
             <p className="caption" style={{ margin: 0 }}>
-              {type === 'track-order' && 'Real-time database consignment tracking & route telematics'}
-              {type === 'contact-us' && 'Direct line to recycling suppliers and collection hubs'}
-              {type === 'feedback' && 'Optimize collection routes and waste categorization'}
-              {type === 'about-us' && 'Zero-landfill circular fashion logistics infrastructure'}
+              {(activeMode === 'order-details' || activeMode === 'order-history') && 'Previous textile pickup orders, total count, and consignment tracking history'}
+              {activeMode === 'track-order' && 'Real-time database consignment tracking & route telematics'}
+              {activeMode === 'contact-us' && 'Direct line to recycling suppliers and collection hubs'}
+              {activeMode === 'feedback' && 'Optimize collection routes and waste categorization'}
+              {activeMode === 'about-us' && 'Zero-landfill circular fashion logistics infrastructure'}
             </p>
           </div>
         </div>
@@ -374,6 +420,159 @@ export default function InfoModal({ type, onClose, initialSearchId = '' }) {
                 Close
               </button>
             </div>
+          </div>
+        )}
+
+        {/* MODE 5: ORDER DETAILS & PREVIOUS DATABASE RECORDS */}
+        {(activeMode === 'order-details' || activeMode === 'order-history') && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            {/* Top Metrics Cards */}
+            <div className="grid-4" style={{ gap: 'var(--space-3)' }}>
+              <div style={{ padding: 'var(--space-3) var(--space-4)', background: '#F8FAFC', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column' }}>
+                <span className="caption" style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 700 }}>Total Orders</span>
+                <strong style={{ fontSize: 'var(--font-size-xl)', color: 'var(--color-primary)' }}>{allOrders.length}</strong>
+              </div>
+              <div style={{ padding: 'var(--space-3) var(--space-4)', background: '#F8FAFC', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column' }}>
+                <span className="caption" style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 700 }}>Recycled Weight</span>
+                <strong style={{ fontSize: 'var(--font-size-xl)', color: 'var(--color-secondary)' }}>
+                  {allOrders.reduce((sum, o) => sum + (Number(o.quantityKg) || 0), 0)} kg
+                </strong>
+              </div>
+              <div style={{ padding: 'var(--space-3) var(--space-4)', background: '#F8FAFC', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column' }}>
+                <span className="caption" style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 700 }}>Active Consignments</span>
+                <strong style={{ fontSize: 'var(--font-size-xl)', color: '#D97706' }}>
+                  {allOrders.filter(o => ['IN_TRANSIT', 'SCHEDULED', 'PROCESSING', 'SUBMITTED', 'MATCHED'].includes(o.status)).length}
+                </strong>
+              </div>
+              <div style={{ padding: 'var(--space-3) var(--space-4)', background: '#F8FAFC', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column' }}>
+                <span className="caption" style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 700 }}>Completed</span>
+                <strong style={{ fontSize: 'var(--font-size-xl)', color: '#059669' }}>
+                  {allOrders.filter(o => o.status === 'COMPLETED').length}
+                </strong>
+              </div>
+            </div>
+
+            {/* Search & Filter Bar */}
+            <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'center' }}>
+              <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+                <input 
+                  type="text" 
+                  className="input" 
+                  placeholder="Filter by Order ID, Vendor, Material, or Location..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ paddingLeft: '34px', fontSize: 'var(--font-size-xs)' }}
+                />
+                <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                <Filter size={14} style={{ color: 'var(--color-text-muted)' }} />
+                <select 
+                  className="select" 
+                  value={filterStatus} 
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  style={{ fontSize: 'var(--font-size-xs)', padding: 'var(--space-2) var(--space-3)' }}
+                >
+                  <option value="ALL">All Statuses ({allOrders.length})</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="IN_TRANSIT">In Transit</option>
+                  <option value="PROCESSING">Processing</option>
+                  <option value="SCHEDULED">Scheduled</option>
+                  <option value="SUBMITTED">Submitted</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Orders List */}
+            {isLoadingOrders ? (
+              <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--color-text-muted)' }}>
+                <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto var(--space-2)' }} />
+                <div>Fetching previous database orders...</div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', maxHeight: '50vh', overflowY: 'auto', paddingRight: '4px' }}>
+                {allOrders
+                  .filter(o => {
+                    const matchesStatus = filterStatus === 'ALL' || o.status === filterStatus;
+                    const q = searchQuery.toLowerCase();
+                    const matchesQuery = !q || 
+                      (o.orderId && o.orderId.toLowerCase().includes(q)) ||
+                      (o.vendorName && o.vendorName.toLowerCase().includes(q)) ||
+                      (o.material && o.material.toLowerCase().includes(q)) ||
+                      (o.pickupLocation?.address && o.pickupLocation.address.toLowerCase().includes(q));
+                    return matchesStatus && matchesQuery;
+                  })
+                  .map((ord) => (
+                    <div 
+                      key={ord._id || ord.orderId} 
+                      className="card card-glass" 
+                      style={{ padding: 'var(--space-4)', border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                          <span className="badge badge-accent" style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{ord.orderId}</span>
+                          <span className="caption" style={{ fontSize: '11px' }}>
+                            {ord.createdAt ? new Date(ord.createdAt).toLocaleDateString() : 'Recent'}
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                          <span className={`badge ${
+                            ord.status === 'COMPLETED' ? 'badge-success' :
+                            ord.status === 'IN_TRANSIT' ? 'badge-primary' :
+                            'badge-neutral'
+                          }`}>
+                            {ord.status}
+                          </span>
+
+                          <button 
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => handleTrackSpecificOrder(ord.orderId)}
+                            style={{ padding: '5px 12px', fontSize: 'var(--font-size-xs)' }}
+                          >
+                            <PackageCheck size={14} />
+                            <span>Track Order</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 'var(--space-2)', fontSize: 'var(--font-size-xs)', background: 'rgba(255,255,255,0.7)', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+                        <div>
+                          <span className="caption">Material & Quantity:</span>
+                          <div><strong>{ord.material || 'Cotton'} • {ord.quantityKg} kg</strong></div>
+                        </div>
+
+                        <div>
+                          <span className="caption">Recycling Vendor:</span>
+                          <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <strong>{ord.vendorName || 'Recycling Hub'}</strong>
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="caption">Pickup Location:</span>
+                          <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <strong>{ord.pickupLocation?.address || 'Pickup Point'}</strong>
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="caption">Est. Payout:</span>
+                          <div style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{ord.estimatedPrice || '$25.00'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                {allOrders.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--color-text-muted)' }}>
+                    <div>No previous orders found in database.</div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

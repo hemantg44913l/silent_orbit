@@ -2,7 +2,68 @@ import mongoose from 'mongoose';
 import { Order } from '../models/Order.js';
 
 // In-memory fallback array for orders if MongoDB Atlas is unreachable
-const memoryOrders = [];
+const memoryOrders = [
+  {
+    _id: 'ord-10001',
+    orderId: 'TXL-8940-2026',
+    textileId: 'sub-8940',
+    vendorName: 'EcoFiber Circular Solutions Hub',
+    selectedPath: 'sell',
+    material: '100% Pure Cotton',
+    quantityKg: 45,
+    condition: 'Usable condition',
+    pickupLocation: { address: 'Austin, TX', latitude: 30.2672, longitude: -97.7431 },
+    destinationLocation: { name: 'EcoFiber Circular Hub', address: '100 Circular Way, Austin, TX' },
+    status: 'COMPLETED',
+    estimatedPrice: '$83.25',
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    _id: 'ord-10002',
+    orderId: 'TXL-8941-2026',
+    textileId: 'sub-8941',
+    vendorName: 'TexReclaim Industrial Shoddy Mill',
+    selectedPath: 'sell',
+    material: 'Denim & Canvas Offcuts',
+    quantityKg: 120,
+    condition: 'Scrap / Cutoffs',
+    pickupLocation: { address: 'Round Rock, TX', latitude: 30.5083, longitude: -97.6789 },
+    destinationLocation: { name: 'TexReclaim Facility', address: '450 Industrial Blvd, Round Rock, TX' },
+    status: 'IN_TRANSIT',
+    estimatedPrice: '$192.00',
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    _id: 'ord-10003',
+    orderId: 'TXL-8942-2026',
+    textileId: 'sub-8942',
+    vendorName: 'PurePoly Thermal Recycling Plant',
+    selectedPath: 'disposal',
+    material: 'Polyester Blend',
+    quantityKg: 85,
+    condition: 'Mixed synthetic',
+    pickupLocation: { address: 'San Marcos, TX', latitude: 29.8833, longitude: -97.9414 },
+    destinationLocation: { name: 'PurePoly Plant', address: '78 Eco Park, San Marcos, TX' },
+    status: 'SCHEDULED',
+    estimatedPrice: '$80.75',
+    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    _id: 'ord-10004',
+    orderId: 'TXL-8943-2026',
+    textileId: 'sub-8943',
+    vendorName: 'Circular Wool & Garnetting Co.',
+    selectedPath: 'sell',
+    material: 'Wool & Cashmere',
+    quantityKg: 30,
+    condition: 'Good condition',
+    pickupLocation: { address: 'Cedar Park, TX', latitude: 30.5052, longitude: -97.8203 },
+    destinationLocation: { name: 'Circular Wool Hub', address: '12 Wool St, Cedar Park, TX' },
+    status: 'PROCESSING',
+    estimatedPrice: '$63.00',
+    createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+  }
+];
 
 export const orderService = {
   createOrder: async (data) => {

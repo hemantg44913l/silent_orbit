@@ -233,5 +233,20 @@ export const api = {
     }
     const json = await res.json();
     return json.data;
+  },
+
+  /**
+   * Fetch All Previous Orders from MongoDB Database
+   */
+  async fetchAllOrders() {
+    try {
+      const res = await fetch(`${API_BASE}/orders`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      return json.data || [];
+    } catch (err) {
+      console.error('[API Client] Error fetching all orders from database:', err.message);
+      return [];
+    }
   }
 };

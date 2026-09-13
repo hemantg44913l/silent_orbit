@@ -57,6 +57,12 @@ export default function SiteHeader({
             Track Order
           </span>
           <span 
+            className={`nav-item ${activeNav === 'order-details' ? 'active' : ''}`}
+            onClick={() => handleNavClick('order-details')}
+          >
+            Order Details
+          </span>
+          <span 
             className={`nav-item ${activeNav === 'contact-us' ? 'active' : ''}`}
             onClick={() => handleNavClick('contact-us')}
           >
@@ -146,6 +152,13 @@ export default function SiteHeader({
               onClick={() => handleNavClick('track-order')}
             >
               Track Order
+            </button>
+            <button 
+              type="button" 
+              className={`mobile-nav-item ${activeNav === 'order-details' ? 'active' : ''}`}
+              onClick={() => handleNavClick('order-details')}
+            >
+              Order Details
             </button>
             <button 
               type="button" 
